@@ -382,6 +382,34 @@ export default function GameDetailScreen() {
             <Text style={styles.adminButtonText}>Manage Game</Text>
           </TouchableOpacity>
         )}
+
+        {/* Leave Squares Button */}
+        {userEntries.length > 0 && game.status === 'pending' && (
+          <TouchableOpacity
+            style={[styles.leaveButton, leaving && styles.leaveButtonDisabled]}
+            onPress={handleLeaveSquares}
+            disabled={leaving}
+          >
+            <Ionicons name="exit-outline" size={24} color="#FFF" />
+            <Text style={styles.leaveButtonText}>
+              {leaving ? 'Leaving...' : 'Leave All My Squares'}
+            </Text>
+          </TouchableOpacity>
+        )}
+
+        {/* Delete Game Button (Creator Only) */}
+        {isCreator && game.status === 'pending' && (
+          <TouchableOpacity
+            style={[styles.deleteButton, deleting && styles.deleteButtonDisabled]}
+            onPress={handleDeleteGame}
+            disabled={deleting}
+          >
+            <Ionicons name="trash-outline" size={24} color="#FFF" />
+            <Text style={styles.deleteButtonText}>
+              {deleting ? 'Deleting...' : 'Delete Game'}
+            </Text>
+          </TouchableOpacity>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
