@@ -207,42 +207,52 @@ export default function GameDetailScreen() {
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Squares</Text>
           <View style={styles.gridContainer}>
-            {game.squares.map((square: any, index: number) => (
-              <TouchableOpacity
-                key={index}
-                style={[
-                  styles.square,
-                  square !== null && { backgroundColor: getUserColor(square.user_id) },
-                  square === null && canJoinMore && styles.emptySquare,
-                ]}
-                onPress={() => square === null && canJoinMore && handleJoinSquare(index)}
-                disabled={square !== null || !canJoinMore || joining}
-              >
-                {game.status !== 'pending' && game.random_numbers[index] !== null ? (
-                  // Active game: Show number badge + user name
-                  <>
-                    <View style={styles.randomNumberBadge}>
-                      <Text style={styles.randomNumber}>{game.random_numbers[index]}</Text>
+            {game.squares.map((square: any, index: number) => {
+              const isOwnedByUser = square?.user_id === user?.user_id;
+              
+              return (
+                <TouchableOpacity
+                  key={index}
+                  style={[
+                    styles.square,
+                    square !== null && { backgroundColor: getUserColor(square.user_id) },
+                    square === null && canJoinMore && styles.emptySquare,
+                    isOwnedByUser && styles.ownedSquare,
+                  ]}
+                  onPress={() => square === null && canJoinMore && handleJoinSquare(index)}
+                  disabled={square !== null || !canJoinMore || joining}
+                >
+                  {isOwnedByUser && (
+                    <View style={styles.youBadge}>
+                      <Text style={styles.youBadgeText}>YOU</Text>
                     </View>
-                    <Text style={styles.squareUserActive} numberOfLines={1}>
-                      {square?.user_name?.length > 10 
-                        ? square.user_name.substring(0, 10) + '...'
-                        : square?.user_name}
+                  )}
+                  {game.status !== 'pending' && game.random_numbers[index] !== null ? (
+                    // Active game: Show number badge + user name
+                    <>
+                      <View style={styles.randomNumberBadge}>
+                        <Text style={styles.randomNumber}>{game.random_numbers[index]}</Text>
+                      </View>
+                      <Text style={styles.squareUserActive} numberOfLines={1}>
+                        {square?.user_name?.length > 10 
+                          ? square.user_name.substring(0, 10) + '...'
+                          : square?.user_name}
+                      </Text>
+                    </>
+                  ) : square !== null ? (
+                    // Pending game: Show user name only
+                    <Text style={styles.squareUser} numberOfLines={2}>
+                      {square.user_name.length > 12 
+                        ? square.user_name.substring(0, 12) + '...'
+                        : square.user_name}
                     </Text>
-                  </>
-                ) : square !== null ? (
-                  // Pending game: Show user name only
-                  <Text style={styles.squareUser} numberOfLines={2}>
-                    {square.user_name.length > 12 
-                      ? square.user_name.substring(0, 12) + '...'
-                      : square.user_name}
-                  </Text>
-                ) : canJoinMore ? (
-                  // Empty square: Show "Click to Pick"
-                  <Text style={styles.clickToPickText}>Click to Pick</Text>
-                ) : null}
-              </TouchableOpacity>
-            ))}
+                  ) : canJoinMore ? (
+                    // Empty square: Show "Click to Pick"
+                    <Text style={styles.clickToPickText}>Click to Pick</Text>
+                  ) : null}
+                </TouchableOpacity>
+              );
+            })}
           </View>
         </View>
 
