@@ -459,6 +459,88 @@ async def update_score(game_id: str, score_request: UpdateScoreRequest, authoriz
         "payout_amount": payout_amount
     }
 
+@api_router.post("/games/{game_id}/leave")
+async def leave_square(game_id: str, authorization: Optional[str] = Header(None)):
+    """Leave/undo a square selection (only if game is still pending)"""
+    user = await get_current_user(authorization)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    # Get game
+    game = await db.games.find_one({"game_id": game_id}, {"_id": 0})
+    if not game:
+        raise HTTPException(status_code=404, detail="Game not found")
+    
+    if game["status"] != "pending":
+        raise HTTPException(status_code=400, detail="Cannot leave square after game has started")
+    
+    # Find user's entries in this game
+    entries = await db.game_entries.find(
+        {"game_id": game_id, "user_id": user.user_id},
+        {"_id": 0}
+    ).to_list(10)
+    
+    if not entries:
+        raise HTTPException(status_code=400, detail="You have no entries in this game")
+    
+    # Remove all user's entries
+    for entry in entries:
+        square_num = entry["square_number"]
+        game["squares"][square_num] = None
+        
+        # Refund user (only if entry fee > 0)
+        if entry["paid_amount"] > 0:
+            await db.users.update_one(
+                {"user_id": user.user_id},
+                {"$inc": {"mock_balance": entry["paid_amount"]}}
+            )
+    
+    # Delete entries
+    await db.game_entries.delete_many({"game_id": game_id, "user_id": user.user_id})
+    
+    # Update game
+    await db.games.update_one(
+        {"game_id": game_id},
+        {"$set": {"squares": game["squares"]}}
+    )
+    
+    return {"message": f"Successfully left {len(entries)} square(s)", "refunded": sum(e["paid_amount"] for e in entries)}
+
+@api_router.delete("/games/{game_id}")
+async def delete_game(game_id: str, authorization: Optional[str] = Header(None)):
+    """Delete a game (only creator can do this, and only if game is pending)"""
+    user = await get_current_user(authorization)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    # Get game
+    game = await db.games.find_one({"game_id": game_id}, {"_id": 0})
+    if not game:
+        raise HTTPException(status_code=404, detail="Game not found")
+    
+    if game["creator_id"] != user.user_id:
+        raise HTTPException(status_code=403, detail="Only game creator can delete the game")
+    
+    if game["status"] != "pending":
+        raise HTTPException(status_code=400, detail="Cannot delete game after it has started")
+    
+    # Refund all players
+    entries = await db.game_entries.find({"game_id": game_id}, {"_id": 0}).to_list(100)
+    for entry in entries:
+        if entry["paid_amount"] > 0:
+            await db.users.update_one(
+                {"user_id": entry["user_id"]},
+                {"$inc": {"mock_balance": entry["paid_amount"]}}
+            )
+    
+    # Delete all entries
+    await db.game_entries.delete_many({"game_id": game_id})
+    
+    # Delete game
+    await db.games.delete_one({"game_id": game_id})
+    
+    return {"message": "Game deleted successfully", "refunded_entries": len(entries)}
+
 @api_router.get("/profile")
 async def get_profile(authorization: Optional[str] = Header(None)):
     """Get user profile with game history"""
