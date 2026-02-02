@@ -271,46 +271,91 @@ db.user_sessions.insertOne({{
             self.log_result("Join Game - Third Square (Limit Test)", False, f"Request failed: {e}")
     
     def test_fill_remaining_squares(self):
-        """Create second user and fill remaining squares to activate game"""
+        """Create multiple users and fill remaining squares to activate game"""
         print("🧪 Testing game activation by filling all squares...")
         
-        # Create second test user
-        self.second_user_id, self.second_user_token = self.create_test_user("_2")
-        
-        if not self.second_user_token:
-            self.log_result("Fill Remaining Squares", False, "Could not create second test user")
+        if not self.game_id:
+            self.log_result("Fill Remaining Squares", False, "No game_id available for testing")
             return
         
-        headers = {
-            "Authorization": f"Bearer {self.second_user_token}",
-            "Content-Type": "application/json"
-        }
+        # We already have 2 squares filled by the first user (squares 0 and 1)
+        # Need to fill squares 2-9 (8 more squares)
+        # Since each user can only have 2 entries, we need 4 more users
         
-        # Fill squares 2-9 (8 squares)
+        users_created = []
         success_count = 0
-        for square_num in range(2, 10):
-            join_data = {"square_number": square_num}
-            
-            try:
-                response = requests.post(f"{BASE_URL}/games/{self.game_id}/join", headers=headers, json=join_data, timeout=10)
-                
-                if response.status_code == 200:
-                    success_count += 1
-                    data = response.json()
-                    print(f"   ✅ Filled square {square_num}, game status: {data.get('game_status', 'unknown')}")
-                else:
-                    print(f"   ❌ Failed to fill square {square_num}: {response.status_code}")
-                    
-            except Exception as e:
-                print(f"   ❌ Error filling square {square_num}: {e}")
         
-        if success_count == 8:
+        for user_num in range(2, 6):  # Create users 2, 3, 4, 5
+            user_id, user_token = self.create_test_user(f"_{user_num}")
+            
+            if not user_token:
+                print(f"   ❌ Failed to create user {user_num}")
+                continue
+                
+            users_created.append((user_id, user_token))
+            
+            headers = {
+                "Authorization": f"Bearer {user_token}",
+                "Content-Type": "application/json"
+            }
+            
+            # Each user fills 2 squares
+            for square_offset in range(2):
+                square_num = (user_num - 2) * 2 + 2 + square_offset  # Calculate square number
+                if square_num >= 10:  # Don't exceed 10 squares
+                    break
+                    
+                join_data = {"square_number": square_num}
+                
+                try:
+                    response = requests.post(f"{BASE_URL}/games/{self.game_id}/join", headers=headers, json=join_data, timeout=10)
+                    
+                    if response.status_code == 200:
+                        success_count += 1
+                        data = response.json()
+                        print(f"   ✅ User {user_num} filled square {square_num}, game status: {data.get('game_status', 'unknown')}")
+                        
+                        # Check if game became active
+                        if data.get('game_status') == 'active':
+                            print(f"   🎉 Game activated after filling square {square_num}!")
+                            break
+                    else:
+                        print(f"   ❌ User {user_num} failed to fill square {square_num}: {response.status_code} - {response.text}")
+                        
+                except Exception as e:
+                    print(f"   ❌ Error filling square {square_num}: {e}")
+            
+            # If game is active, break out of user creation loop
+            if success_count > 0:
+                try:
+                    # Check game status
+                    check_headers = {"Authorization": f"Bearer {self.session_token}"}
+                    game_response = requests.get(f"{BASE_URL}/games/{self.game_id}", headers=check_headers, timeout=10)
+                    if game_response.status_code == 200:
+                        game_data = game_response.json()
+                        if game_data.get("status") == "active":
+                            print(f"   🎉 Game is now active with {success_count + 2} total squares filled!")
+                            break
+                except:
+                    pass
+        
+        # Store second user info for later tests
+        if users_created:
+            self.second_user_id, self.second_user_token = users_created[0]
+        
+        total_squares_needed = 8  # We need to fill 8 more squares (2-9)
+        if success_count >= total_squares_needed:
             self.log_result("Fill Remaining Squares", True, f"Successfully filled {success_count} squares", {
                 "squares_filled": success_count,
-                "total_squares": 10
+                "total_squares_needed": total_squares_needed,
+                "users_created": len(users_created)
             })
         else:
-            self.log_result("Fill Remaining Squares", False, f"Only filled {success_count}/8 squares")
+            self.log_result("Fill Remaining Squares", False, f"Only filled {success_count}/{total_squares_needed} squares", {
+                "squares_filled": success_count,
+                "total_squares_needed": total_squares_needed,
+                "users_created": len(users_created)
+            })
     
     def test_get_game_details(self):
         """Test GET /api/games/{game_id} - Get detailed game info"""
