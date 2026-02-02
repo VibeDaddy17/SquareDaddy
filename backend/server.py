@@ -341,11 +341,12 @@ async def join_game(game_id: str, join_request: JoinGameRequest, authorization: 
         "entry_id": entry_id
     }
     
-    # Deduct from user balance
-    await db.users.update_one(
-        {"user_id": user.user_id},
-        {"$inc": {"mock_balance": -game["entry_fee"]}}
-    )
+    # Deduct from user balance (only if entry fee > 0)
+    if game["entry_fee"] > 0:
+        await db.users.update_one(
+            {"user_id": user.user_id},
+            {"$inc": {"mock_balance": -game["entry_fee"]}}
+        )
     
     # Check if all squares are filled
     if all(square is not None for square in game["squares"]):
