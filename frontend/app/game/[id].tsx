@@ -202,6 +202,7 @@ export default function GameDetailScreen() {
                 style={[
                   styles.square,
                   square !== null && { backgroundColor: getUserColor(square.user_id) },
+                  square === null && canJoinMore && styles.emptySquare,
                 ]}
                 onPress={() => square === null && canJoinMore && handleJoinSquare(index)}
                 disabled={square !== null || !canJoinMore || joining}
@@ -212,11 +213,13 @@ export default function GameDetailScreen() {
                     <Text style={styles.randomNumber}>{game.random_numbers[index]}</Text>
                   </View>
                 )}
-                {square !== null && (
+                {square !== null ? (
                   <Text style={styles.squareUser} numberOfLines={1}>
                     {square.user_name}
                   </Text>
-                )}
+                ) : canJoinMore ? (
+                  <Text style={styles.clickToPickText}>Click to Pick</Text>
+                ) : null}
               </TouchableOpacity>
             ))}
           </View>
