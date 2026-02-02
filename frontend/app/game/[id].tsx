@@ -97,8 +97,19 @@ export default function GameDetailScreen() {
   };
 
   const getUserColor = (userId: string) => {
-    if (userId === user?.user_id) return '#4CAF50';
-    const colors = ['#2196F3', '#9C27B0', '#FF9800', '#E91E63', '#00BCD4'];
+    // 10 distinct, accessible colors with good contrast
+    const colors = [
+      '#E53935', // Red
+      '#FB8C00', // Orange
+      '#FDD835', // Yellow
+      '#7CB342', // Light Green
+      '#00897B', // Teal
+      '#039BE5', // Light Blue
+      '#5E35B1', // Deep Purple
+      '#E91E63', // Pink
+      '#8D6E63', // Brown
+      '#546E7A', // Blue Grey
+    ];
     const hash = userId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
     return colors[hash % colors.length];
   };
