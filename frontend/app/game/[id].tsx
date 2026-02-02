@@ -391,10 +391,30 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#1a4d7a',
     padding: 4,
+    position: 'relative',
   },
   emptySquare: {
     borderColor: '#4CAF50',
     borderStyle: 'dashed',
+  },
+  ownedSquare: {
+    borderColor: '#FFD700',
+    borderWidth: 3,
+  },
+  youBadge: {
+    position: 'absolute',
+    top: 2,
+    right: 2,
+    backgroundColor: '#FFD700',
+    paddingHorizontal: 4,
+    paddingVertical: 2,
+    borderRadius: 4,
+    zIndex: 10,
+  },
+  youBadgeText: {
+    fontSize: 7,
+    fontWeight: 'bold',
+    color: '#000',
   },
   randomNumberBadge: {
     backgroundColor: '#FFD700',
