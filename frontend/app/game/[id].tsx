@@ -208,14 +208,26 @@ export default function GameDetailScreen() {
                 disabled={square !== null || !canJoinMore || joining}
               >
                 {game.status !== 'pending' && game.random_numbers[index] !== null ? (
-                  <View style={styles.randomNumberBadge}>
-                    <Text style={styles.randomNumber}>{game.random_numbers[index]}</Text>
-                  </View>
+                  // Active game: Show number badge + user name
+                  <>
+                    <View style={styles.randomNumberBadge}>
+                      <Text style={styles.randomNumber}>{game.random_numbers[index]}</Text>
+                    </View>
+                    <Text style={styles.squareUserActive} numberOfLines={1}>
+                      {square?.user_name?.length > 10 
+                        ? square.user_name.substring(0, 10) + '...'
+                        : square?.user_name}
+                    </Text>
+                  </>
                 ) : square !== null ? (
-                  <Text style={styles.squareUser} numberOfLines={1}>
-                    {square.user_name}
+                  // Pending game: Show user name only
+                  <Text style={styles.squareUser} numberOfLines={2}>
+                    {square.user_name.length > 12 
+                      ? square.user_name.substring(0, 12) + '...'
+                      : square.user_name}
                   </Text>
                 ) : canJoinMore ? (
+                  // Empty square: Show "Click to Pick"
                   <Text style={styles.clickToPickText}>Click to Pick</Text>
                 ) : null}
               </TouchableOpacity>
