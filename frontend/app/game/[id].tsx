@@ -609,6 +609,43 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginLeft: 8,
   },
+  leaveButton: {
+    flexDirection: 'row',
+    backgroundColor: '#FF9800',
+    paddingVertical: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 8,
+  },
+  leaveButtonDisabled: {
+    opacity: 0.5,
+  },
+  leaveButtonText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 8,
+  },
+  deleteButton: {
+    flexDirection: 'row',
+    backgroundColor: '#F44336',
+    paddingVertical: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 8,
+    marginBottom: 16,
+  },
+  deleteButtonDisabled: {
+    opacity: 0.5,
+  },
+  deleteButtonText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 8,
+  },
   errorText: {
     fontSize: 18,
     color: '#888',
