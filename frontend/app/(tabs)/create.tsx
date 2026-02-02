@@ -20,9 +20,9 @@ export default function CreateScreen() {
       return;
     }
 
-    const fee = parseFloat(entryFee);
-    if (isNaN(fee) || fee <= 0) {
-      Alert.alert('Error', 'Please enter a valid entry fee');
+    const fee = entryFee === '' ? 0 : parseFloat(entryFee);
+    if (isNaN(fee) || fee < 0) {
+      Alert.alert('Error', 'Please enter a valid entry fee (0 or greater)');
       return;
     }
 
