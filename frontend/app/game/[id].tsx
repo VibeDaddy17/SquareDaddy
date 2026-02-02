@@ -378,10 +378,11 @@ const styles = StyleSheet.create({
   randomNumberBadge: {
     backgroundColor: '#FFD700',
     borderRadius: 20,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    minWidth: 40,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    minWidth: 36,
     alignItems: 'center',
+    marginBottom: 4,
   },
   randomNumber: {
     fontSize: 18,
@@ -393,6 +394,13 @@ const styles = StyleSheet.create({
     color: '#FFF',
     textAlign: 'center',
     fontWeight: '600',
+  },
+  squareUserActive: {
+    fontSize: 8,
+    color: '#FFF',
+    textAlign: 'center',
+    fontWeight: '600',
+    marginTop: 2,
   },
   clickToPickText: {
     fontSize: 9,
