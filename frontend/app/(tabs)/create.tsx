@@ -100,7 +100,7 @@ export default function CreateScreen() {
               <Text style={styles.label}>Entry Fee ($)</Text>
               <TextInput
                 style={styles.input}
-                placeholder="e.g., 20"
+                placeholder="e.g., 20 or 0 for free"
                 placeholderTextColor="#666"
                 value={entryFee}
                 onChangeText={setEntryFee}
@@ -111,7 +111,7 @@ export default function CreateScreen() {
             <View style={styles.infoBox}>
               <Ionicons name="information-circle" size={20} color="#2196F3" />
               <Text style={styles.infoText}>
-                Total pot will be ${entryFee ? (parseFloat(entryFee) * 10).toFixed(2) : '0.00'}
+                Total pot will be ${entryFee ? (parseFloat(entryFee) * 10).toFixed(2) : '0.00'} {entryFee === '0' || !entryFee ? '(Free game!)' : ''}
               </Text>
             </View>
 
