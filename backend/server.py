@@ -280,6 +280,8 @@ async def create_game(game_request: CreateGameRequest, authorization: Optional[s
     }
     
     await db.games.insert_one(game)
+    # Remove MongoDB's _id field before returning
+    game.pop('_id', None)
     return game
 
 @api_router.post("/games/{game_id}/join")
