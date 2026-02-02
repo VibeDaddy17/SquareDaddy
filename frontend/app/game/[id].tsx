@@ -597,6 +597,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 8,
   },
   quarterLabel: {
     fontSize: 16,
@@ -605,17 +606,52 @@ const styles = StyleSheet.create({
   },
   quarterScore: {
     fontSize: 16,
+    fontWeight: '600',
     color: '#2196F3',
+  },
+  quarterNotEntered: {
+    fontSize: 14,
+    color: '#888',
+    fontStyle: 'italic',
+  },
+  quarterDetails: {
+    marginTop: 4,
+  },
+  winningNumberContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  winningNumberLabel: {
+    fontSize: 14,
+    color: '#AAA',
+    marginRight: 8,
+  },
+  winningNumberBadge: {
+    backgroundColor: '#FFD700',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  winningNumberText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#000',
   },
   winnerInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 8,
   },
   winnerText: {
     fontSize: 14,
     color: '#4CAF50',
     marginLeft: 8,
+    fontWeight: '600',
+  },
+  noWinnerText: {
+    fontSize: 13,
+    color: '#FF9800',
+    fontStyle: 'italic',
   },
   adminButton: {
     flexDirection: 'row',
