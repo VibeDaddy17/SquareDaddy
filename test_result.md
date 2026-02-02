@@ -101,3 +101,149 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: "Sports Squares betting game backend API testing"
+
+backend:
+  - task: "User Authentication"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "GET /api/auth/me successfully returns user info with valid token. POST /api/auth/logout successfully logs out user. Authentication system working correctly."
+
+  - task: "Game Creation"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "Initial test failed with HTTP 520 due to ObjectId serialization error in FastAPI response"
+        - working: true
+          agent: "testing"
+          comment: "Fixed ObjectId serialization issue by removing MongoDB's _id field before returning game object. POST /api/games now successfully creates games with proper event_name and entry_fee."
+
+  - task: "Game Listing"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "GET /api/games successfully returns list of games including newly created games. User entries are properly included for each game."
+
+  - task: "Game Joining"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "Initial test failed with HTTP 520 due to ObjectId serialization error in game entry response"
+        - working: true
+          agent: "testing"
+          comment: "Fixed ObjectId serialization issue in join_game function. POST /api/games/{game_id}/join now works correctly. Verified 2-entry limit per user is enforced. Game activation works when all 10 squares are filled."
+
+  - task: "Game Details"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "GET /api/games/{game_id} successfully returns detailed game info including squares, entries, random numbers, and payouts. All fields properly populated when game is active."
+
+  - task: "Score Updates"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "POST /api/games/{game_id}/score works correctly for all quarters (Q1-Q4). Winning number calculation is accurate. Winner determination and payout calculation working. Only game creators can update scores (proper authorization). User balances updated correctly."
+
+  - task: "User Profile"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "GET /api/profile successfully returns user info, entries, payouts, created games, and total winnings. All data properly aggregated and returned."
+
+  - task: "Random Number Generation"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "Random number generation (0-9, no duplicates) works correctly when all squares are filled. Game status changes from 'pending' to 'active' as expected."
+
+  - task: "Balance Management"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "User balance deduction on game join and credit on win working correctly. Payout percentages (Q1: 20%, Q2: 20%, Q3: 20%, Q4: 40%) calculated accurately."
+
+frontend:
+  - task: "Frontend Testing"
+    implemented: false
+    working: "NA"
+    file: "N/A"
+    stuck_count: 0
+    priority: "low"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "testing"
+          comment: "Frontend testing not performed as per system limitations and instructions. Only backend API testing was conducted."
+
+metadata:
+  created_by: "testing_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: false
+
+test_plan:
+  current_focus: []
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+    - agent: "testing"
+      message: "Comprehensive backend API testing completed successfully. All 15 test cases passed (100% success rate). Fixed 2 critical ObjectId serialization issues during testing. Backend is fully functional and ready for production use."
