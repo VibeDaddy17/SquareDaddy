@@ -94,6 +94,90 @@ export default function GameDetailScreen() {
     );
   };
 
+  const handleLeaveSquares = async () => {
+    Alert.alert(
+      'Leave Game',
+      'Are you sure you want to leave all your squares? Your entry fee will be refunded.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Leave',
+          style: 'destructive',
+          onPress: async () => {
+            setLeaving(true);
+            try {
+              const token = await AsyncStorage.getItem('session_token');
+              const response = await fetch(`${BACKEND_URL}/api/games/${id}/leave`, {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${token}`
+                }
+              });
+
+              if (response.ok) {
+                const result = await response.json();
+                Alert.alert('Success', result.message);
+                await refreshUser();
+                await fetchGame();
+              } else {
+                const error = await response.json();
+                Alert.alert('Error', error.detail || 'Failed to leave game');
+              }
+            } catch (error) {
+              console.error('Error leaving game:', error);
+              Alert.alert('Error', 'Failed to leave game');
+            } finally {
+              setLeaving(false);
+            }
+          }
+        }
+      ]
+    );
+  };
+
+  const handleDeleteGame = async () => {
+    Alert.alert(
+      'Delete Game',
+      'Are you sure you want to delete this game? All players will be refunded.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            setDeleting(true);
+            try {
+              const token = await AsyncStorage.getItem('session_token');
+              const response = await fetch(`${BACKEND_URL}/api/games/${id}`, {
+                method: 'DELETE',
+                headers: {
+                  'Authorization': `Bearer ${token}`
+                }
+              });
+
+              if (response.ok) {
+                Alert.alert('Success', 'Game deleted successfully', [
+                  {
+                    text: 'OK',
+                    onPress: () => router.back()
+                  }
+                ]);
+              } else {
+                const error = await response.json();
+                Alert.alert('Error', error.detail || 'Failed to delete game');
+              }
+            } catch (error) {
+              console.error('Error deleting game:', error);
+              Alert.alert('Error', 'Failed to delete game');
+            } finally {
+              setDeleting(false);
+            }
+          }
+        }
+      ]
+    );
+  };
+
   const getWinnerForQuarter = (quarter: string) => {
     return game?.winners?.[quarter] || null;
   };
