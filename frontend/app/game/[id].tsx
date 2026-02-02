@@ -361,6 +361,10 @@ const styles = StyleSheet.create({
     borderColor: '#1a4d7a',
     padding: 4,
   },
+  emptySquare: {
+    borderColor: '#4CAF50',
+    borderStyle: 'dashed',
+  },
   squareNumber: {
     fontSize: 16,
     fontWeight: 'bold',
@@ -386,6 +390,13 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 4,
     textAlign: 'center',
+  },
+  clickToPickText: {
+    fontSize: 9,
+    color: '#4CAF50',
+    textAlign: 'center',
+    fontWeight: '600',
+    paddingHorizontal: 2,
   },
   quarterItem: {
     padding: 12,
