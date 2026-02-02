@@ -131,7 +131,7 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
-        <Text style={styles.title}>Games</Text>
+        <Text style={styles.title}>Squares</Text>
         <TouchableOpacity onPress={fetchGames}>
           <Ionicons name="refresh" size={24} color="#FFF" />
         </TouchableOpacity>
