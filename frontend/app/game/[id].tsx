@@ -207,13 +207,11 @@ export default function GameDetailScreen() {
                 onPress={() => square === null && canJoinMore && handleJoinSquare(index)}
                 disabled={square !== null || !canJoinMore || joining}
               >
-                <Text style={styles.squareNumber}>{index}</Text>
-                {game.status !== 'pending' && game.random_numbers[index] !== null && (
+                {game.status !== 'pending' && game.random_numbers[index] !== null ? (
                   <View style={styles.randomNumberBadge}>
                     <Text style={styles.randomNumber}>{game.random_numbers[index]}</Text>
                   </View>
-                )}
-                {square !== null ? (
+                ) : square !== null ? (
                   <Text style={styles.squareUser} numberOfLines={1}>
                     {square.user_name}
                   </Text>
