@@ -114,6 +114,9 @@ export default function HomeScreen() {
           <View style={styles.adminBadge}>
             <Ionicons name="star" size={16} color="#FFD700" />
             <Text style={styles.adminText}>Your Game</Text>
+            {item.status === 'active' && (
+              <Text style={styles.adminSubtext}> • Tap to enter scores</Text>
+            )}
           </View>
         )}
       </TouchableOpacity>
