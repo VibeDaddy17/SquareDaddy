@@ -351,19 +351,42 @@ export default function GameDetailScreen() {
               const winnerId = getWinnerForQuarter(quarter);
               const winner = game.squares.find((s: any) => s?.user_id === winnerId);
               const payout = game.payouts?.find((p: any) => p.quarter === quarter);
+              
+              // Calculate winning number if score exists
+              let winningNumber = null;
+              if (score) {
+                const [team1, team2] = score.split('-').map(s => parseInt(s));
+                winningNumber = (team1 % 10 + team2 % 10) % 10;
+              }
 
               return (
                 <View key={quarter} style={styles.quarterItem}>
                   <View style={styles.quarterHeader}>
                     <Text style={styles.quarterLabel}>{quarter}</Text>
-                    {score && <Text style={styles.quarterScore}>{score}</Text>}
+                    {score ? (
+                      <Text style={styles.quarterScore}>{score}</Text>
+                    ) : (
+                      <Text style={styles.quarterNotEntered}>Not entered</Text>
+                    )}
                   </View>
-                  {winner && payout && (
-                    <View style={styles.winnerInfo}>
-                      <Ionicons name="trophy" size={16} color="#FFD700" />
-                      <Text style={styles.winnerText}>
-                        {winner.user_name} - ${payout.amount.toFixed(2)}
-                      </Text>
+                  {score && (
+                    <View style={styles.quarterDetails}>
+                      <View style={styles.winningNumberContainer}>
+                        <Text style={styles.winningNumberLabel}>Winning #:</Text>
+                        <View style={styles.winningNumberBadge}>
+                          <Text style={styles.winningNumberText}>{winningNumber}</Text>
+                        </View>
+                      </View>
+                      {winner && payout ? (
+                        <View style={styles.winnerInfo}>
+                          <Ionicons name="trophy" size={16} color="#FFD700" />
+                          <Text style={styles.winnerText}>
+                            {winner.user_name} wins ${payout.amount.toFixed(2)}
+                          </Text>
+                        </View>
+                      ) : (
+                        <Text style={styles.noWinnerText}>No winner (empty square)</Text>
+                      )}
                     </View>
                   )}
                 </View>
