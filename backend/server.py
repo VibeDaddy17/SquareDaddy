@@ -331,6 +331,8 @@ async def join_game(game_id: str, join_request: JoinGameRequest, authorization: 
         "created_at": datetime.now(timezone.utc)
     }
     await db.game_entries.insert_one(entry)
+    # Remove MongoDB's _id field before returning
+    entry.pop('_id', None)
     
     # Update game squares
     game["squares"][square_num] = {
