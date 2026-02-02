@@ -315,8 +315,8 @@ async def join_game(game_id: str, join_request: JoinGameRequest, authorization: 
     if user_entries_count >= 2:
         raise HTTPException(status_code=400, detail="You can only have 2 entries per game")
     
-    # Check user balance
-    if user.mock_balance < game["entry_fee"]:
+    # Check user balance (only if entry fee > 0)
+    if game["entry_fee"] > 0 and user.mock_balance < game["entry_fee"]:
         raise HTTPException(status_code=400, detail="Insufficient balance")
     
     # Create entry
