@@ -17,20 +17,20 @@ export default function TabsLayout() {
       }}
     >
       <Tabs.Screen
-        name="home"
-        options={{
-          title: 'Games',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="grid" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="create"
         options={{
           title: 'Create',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="add-circle" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="home"
+        options={{
+          title: 'Squares',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="grid" size={size} color={color} />
           ),
         }}
       />
