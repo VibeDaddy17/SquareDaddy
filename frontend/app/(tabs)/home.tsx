@@ -239,12 +239,18 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     borderTopWidth: 1,
     borderTopColor: '#0f3460',
+    flexWrap: 'wrap',
   },
   adminText: {
     fontSize: 14,
     color: '#FFD700',
     marginLeft: 6,
     fontWeight: '600',
+  },
+  adminSubtext: {
+    fontSize: 12,
+    color: '#4CAF50',
+    fontWeight: '500',
   },
   emptyContainer: {
     flex: 1,
