@@ -181,8 +181,8 @@ export default function GameDetailScreen() {
 
   const handleShareGame = async () => {
     try {
-      // Create deep link URL
-      const gameUrl = Linking.createURL(`game/${id}`);
+      // Create proper deep link URL using the custom scheme
+      const gameUrl = `sportssquares://game/${id}`;
       
       // Prepare share message
       const message = `Join my Sports Squares game: ${game.event_name}!\n\n` +
