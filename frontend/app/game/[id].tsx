@@ -274,6 +274,12 @@ export default function GameDetailScreen() {
       />
 
       <ScrollView contentContainerStyle={styles.content}>
+        {/* Share Button - Prominent at top */}
+        <TouchableOpacity style={styles.shareButton} onPress={handleShareGame}>
+          <Ionicons name="share-social" size={24} color="#FFF" />
+          <Text style={styles.shareButtonText}>Share Game</Text>
+        </TouchableOpacity>
+
         {/* Game Info */}
         <View style={styles.infoCard}>
           <View style={styles.infoRow}>
