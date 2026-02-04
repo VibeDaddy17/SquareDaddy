@@ -179,6 +179,37 @@ export default function GameDetailScreen() {
     );
   };
 
+  const handleShareGame = async () => {
+    try {
+      // Create deep link URL
+      const gameUrl = Linking.createURL(`game/${id}`);
+      
+      // Prepare share message
+      const message = `Join my Sports Squares game: ${game.event_name}!\n\n` +
+                     `Entry Fee: $${game.entry_fee}\n` +
+                     `Squares Available: ${10 - game.squares.filter((s: any) => s !== null).length}/10\n\n` +
+                     `Tap to join: ${gameUrl}`;
+
+      const result = await Share.share({
+        message: message,
+        title: `Join ${game.event_name}`,
+      });
+
+      if (result.action === Share.sharedAction) {
+        if (result.activityType) {
+          console.log('Shared with activity type:', result.activityType);
+        } else {
+          console.log('Shared successfully');
+        }
+      } else if (result.action === Share.dismissedAction) {
+        console.log('Share dismissed');
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+      Alert.alert('Error', 'Failed to share game link');
+    }
+  };
+
   const getWinnerForQuarter = (quarter: string) => {
     return game?.winners?.[quarter] || null;
   };
