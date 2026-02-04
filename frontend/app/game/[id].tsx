@@ -490,6 +490,22 @@ const styles = StyleSheet.create({
   content: {
     padding: 16,
   },
+  shareButton: {
+    flexDirection: 'row',
+    backgroundColor: '#9C27B0',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  shareButtonText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 8,
+  },
   infoCard: {
     backgroundColor: '#16213e',
     borderRadius: 12,
