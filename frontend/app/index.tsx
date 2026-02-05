@@ -28,7 +28,7 @@ export default function Index() {
         <View style={styles.iconContainer}>
           <Ionicons name="grid" size={80} color="#4CAF50" />
         </View>
-        <Text style={styles.title}>Sports Squares</Text>
+        <Text style={styles.title}>SquareDaddy</Text>
         <Text style={styles.subtitle}>Join games, pick squares, win big!</Text>
         
         <View style={styles.features}>
