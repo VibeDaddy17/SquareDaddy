@@ -221,13 +221,25 @@ async def get_games(authorization: Optional[str] = Header(None)):
         {"_id": 0, "game_id": 1, "creator_id": 1, "event_name": 1, "entry_fee": 1, "status": 1, "squares": 1, "random_numbers": 1, "created_at": 1, "quarter_scores": 1, "winners": 1}
     ).sort("created_at", -1).limit(100).to_list(100)
     
-    # Add user's entries to each game
-    for game in games:
-        user_entries = await db.game_entries.find(
-            {"game_id": game["game_id"], "user_id": user.user_id},
-            {"_id": 0}
-        ).to_list(10)
-        game["user_entries"] = user_entries
+    # Optimize: Batch fetch all user entries in a single query instead of N+1 queries
+    if games:
+        game_ids = [game["game_id"] for game in games]
+        all_user_entries = await db.game_entries.find(
+            {"game_id": {"$in": game_ids}, "user_id": user.user_id},
+            {"_id": 0, "game_id": 1, "entry_id": 1, "square_number": 1, "paid_amount": 1}
+        ).to_list(1000)
+        
+        # Group entries by game_id
+        entries_by_game = {}
+        for entry in all_user_entries:
+            game_id = entry["game_id"]
+            if game_id not in entries_by_game:
+                entries_by_game[game_id] = []
+            entries_by_game[game_id].append(entry)
+        
+        # Attach user entries to each game
+        for game in games:
+            game["user_entries"] = entries_by_game.get(game["game_id"], [])
     
     return games
 
