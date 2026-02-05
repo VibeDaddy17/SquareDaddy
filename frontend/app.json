@@ -1,16 +1,16 @@
 {
   "expo": {
-    "name": "Sports Squares",
-    "slug": "sports-squares",
+    "name": "SquareDaddy",
+    "slug": "squaredaddy",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "sportssquares",
+    "scheme": "squaredaddy",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.sportssquares.app"
+      "bundleIdentifier": "com.squaredaddy.app"
     },
     "android": {
       "adaptiveIcon": {
@@ -18,7 +18,7 @@
         "backgroundColor": "#000"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.sportssquares.app"
+      "package": "com.squaredaddy.app"
     },
     "web": {
       "bundler": "metro",
