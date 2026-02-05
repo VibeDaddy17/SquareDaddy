@@ -1,318 +1,336 @@
+diff --git a/frontend/contexts/AuthContext.tsx b/frontend/contexts/AuthContext.tsx
+index dd6587d..26aebd7 100644
+--- a/frontend/contexts/AuthContext.tsx
++++ b/frontend/contexts/AuthContext.tsx
+@@ -102,7 +102,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
+   const login = async () => {
+     try {
+       const redirectUrl = Platform.OS === 'web'
+-        ? `${BACKEND_URL}/`
++        ? window.location.origin + '/'
+         : Linking.createURL('/');
+ 
+       const authUrl = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirectUrl)}`;
 diff --git a/model.patch b/model.patch
-index fff5e50..e69de29 100644
+index 1cee346..e69de29 100644
 --- a/model.patch
 +++ b/model.patch
-@@ -1,313 +0,0 @@
--diff --git a/backend/server.py b/backend/server.py
--index 6e6a6f3..8734de5 100644
----- a/backend/server.py
--+++ b/backend/server.py
--@@ -280,6 +280,8 @@ async def create_game(game_request: CreateGameRequest, authorization: Optional[s
--     }
--     
--     await db.games.insert_one(game)
--+    # Remove MongoDB's _id field before returning
--+    game.pop('_id', None)
--     return game
-- 
-- @api_router.post("/games/{game_id}/join")
--@@ -329,6 +331,8 @@ async def join_game(game_id: str, join_request: JoinGameRequest, authorization:
--         "created_at": datetime.now(timezone.utc)
--     }
--     await db.game_entries.insert_one(entry)
--+    # Remove MongoDB's _id field before returning
--+    entry.pop('_id', None)
--     
--     # Update game squares
--     game["squares"][square_num] = {
--diff --git a/quick_test.py b/quick_test.py
--new file mode 100644
--index 0000000..a72dcbf
----- /dev/null
--+++ b/quick_test.py
--@@ -0,0 +1,126 @@
--+#!/usr/bin/env python3
--+"""
--+Quick test for game joining functionality
--+"""
--+
--+import requests
--+import json
--+import time
--+import subprocess
--+
--+BASE_URL = "https://luckyvibe.preview.emergentagent.com/api"
--+MONGO_DB = "test_database"
--+
--+def create_test_user():
--+    """Create a test user and session in MongoDB"""
--+    timestamp = int(time.time() * 1000)
--+    user_id = f"user_{timestamp}"
--+    session_token = f"test_session_{timestamp}"
--+    email = f"test.user.{timestamp}@example.com"
--+    
--+    mongo_commands = f'''
--+use('{MONGO_DB}');
--+db.users.insertOne({{
--+  user_id: "{user_id}",
--+  email: "{email}",
--+  name: "Test User",
--+  picture: "https://via.placeholder.com/150",
--+  mock_balance: 1000.0,
--+  created_at: new Date()
--+}});
--+db.user_sessions.insertOne({{
--+  user_id: "{user_id}",
--+  session_token: "{session_token}",
--+  expires_at: new Date(Date.now() + 7*24*60*60*1000),
--+  created_at: new Date()
--+}});
--+'''
--+    
--+    try:
--+        result = subprocess.run(
--+            ["mongosh", "--eval", mongo_commands],
--+            capture_output=True,
--+            text=True,
--+            timeout=30
--+        )
--+        
--+        if result.returncode == 0:
--+            print(f"✅ Created user: {user_id}")
--+            return user_id, session_token
--+        else:
--+            print(f"❌ MongoDB error: {result.stderr}")
--+            return None, None
--+            
--+    except Exception as e:
--+        print(f"❌ Error creating test user: {e}")
--+        return None, None
--+
--+def test_game_flow():
--+    """Test the complete game flow"""
--+    
--+    # Create test user
--+    user_id, session_token = create_test_user()
--+    if not session_token:
--+        print("❌ Failed to create test user")
--+        return
--+    
--+    headers = {
--+        "Authorization": f"Bearer {session_token}",
--+        "Content-Type": "application/json"
--+    }
--+    
--+    # Create game
--+    print("🧪 Creating game...")
--+    game_data = {"event_name": "Test Super Bowl", "entry_fee": 20.0}
--+    
--+    try:
--+        response = requests.post(f"{BASE_URL}/games", headers=headers, json=game_data, timeout=10)
--+        print(f"Create game response: {response.status_code}")
--+        
--+        if response.status_code == 200:
--+            game = response.json()
--+            game_id = game["game_id"]
--+            print(f"✅ Created game: {game_id}")
--+        else:
--+            print(f"❌ Failed to create game: {response.text}")
--+            return
--+            
--+    except Exception as e:
--+        print(f"❌ Error creating game: {e}")
--+        return
--+    
--+    # Join game
--+    print("🧪 Joining game...")
--+    join_data = {"square_number": 0}
--+    
--+    try:
--+        response = requests.post(f"{BASE_URL}/games/{game_id}/join", headers=headers, json=join_data, timeout=10)
--+        print(f"Join game response: {response.status_code}")
--+        
--+        if response.status_code == 200:
--+            join_result = response.json()
--+            print(f"✅ Joined game successfully: {join_result}")
--+        else:
--+            print(f"❌ Failed to join game: {response.text}")
--+            
--+    except Exception as e:
--+        print(f"❌ Error joining game: {e}")
--+    
--+    # Cleanup
--+    print("🧹 Cleaning up...")
--+    mongo_commands = f'''
--+use('{MONGO_DB}');
--+db.users.deleteMany({{email: /test\\.user\\./}});
--+db.user_sessions.deleteMany({{session_token: /test_session/}});
--+db.games.deleteMany({{event_name: "Test Super Bowl"}});
--+db.game_entries.deleteMany({{user_id: /user_/}});
--+'''
--+    
--+    try:
--+        subprocess.run(["mongosh", "--eval", mongo_commands], capture_output=True, text=True, timeout=30)
--+        print("✅ Cleanup completed")
--+    except Exception as e:
--+        print(f"⚠️  Cleanup error: {e}")
--+
--+if __name__ == "__main__":
--+    test_game_flow()
--\ No newline at end of file
--diff --git a/test_result.md b/test_result.md
--index 187cba4..93bf431 100644
----- a/test_result.md
--+++ b/test_result.md
--@@ -100,4 +100,150 @@
-- 
-- #====================================================================================================
-- # Testing Data - Main Agent and testing sub agent both should log testing data below this section
---#====================================================================================================
--\ No newline at end of file
--+#====================================================================================================
--+
--+user_problem_statement: "Sports Squares betting game backend API testing"
--+
--+backend:
--+  - task: "User Authentication"
--+    implemented: true
--+    working: true
--+    file: "/app/backend/server.py"
--+    stuck_count: 0
--+    priority: "high"
--+    needs_retesting: false
--+    status_history:
--+        - working: true
--+          agent: "testing"
--+          comment: "GET /api/auth/me successfully returns user info with valid token. POST /api/auth/logout successfully logs out user. Authentication system working correctly."
--+
--+  - task: "Game Creation"
--+    implemented: true
--+    working: true
--+    file: "/app/backend/server.py"
--+    stuck_count: 1
--+    priority: "high"
--+    needs_retesting: false
--+    status_history:
--+        - working: false
--+          agent: "testing"
--+          comment: "Initial test failed with HTTP 520 due to ObjectId serialization error in FastAPI response"
--+        - working: true
--+          agent: "testing"
--+          comment: "Fixed ObjectId serialization issue by removing MongoDB's _id field before returning game object. POST /api/games now successfully creates games with proper event_name and entry_fee."
--+
--+  - task: "Game Listing"
--+    implemented: true
--+    working: true
--+    file: "/app/backend/server.py"
--+    stuck_count: 0
--+    priority: "high"
--+    needs_retesting: false
--+    status_history:
--+        - working: true
--+          agent: "testing"
--+          comment: "GET /api/games successfully returns list of games including newly created games. User entries are properly included for each game."
--+
--+  - task: "Game Joining"
--+    implemented: true
--+    working: true
--+    file: "/app/backend/server.py"
--+    stuck_count: 1
--+    priority: "high"
--+    needs_retesting: false
--+    status_history:
--+        - working: false
--+          agent: "testing"
--+          comment: "Initial test failed with HTTP 520 due to ObjectId serialization error in game entry response"
--+        - working: true
--+          agent: "testing"
--+          comment: "Fixed ObjectId serialization issue in join_game function. POST /api/games/{game_id}/join now works correctly. Verified 2-entry limit per user is enforced. Game activation works when all 10 squares are filled."
--+
--+  - task: "Game Details"
--+    implemented: true
--+    working: true
--+    file: "/app/backend/server.py"
--+    stuck_count: 0
--+    priority: "high"
--+    needs_retesting: false
--+    status_history:
--+        - working: true
--+          agent: "testing"
--+          comment: "GET /api/games/{game_id} successfully returns detailed game info including squares, entries, random numbers, and payouts. All fields properly populated when game is active."
--+
--+  - task: "Score Updates"
--+    implemented: true
--+    working: true
--+    file: "/app/backend/server.py"
--+    stuck_count: 0
--+    priority: "high"
--+    needs_retesting: false
--+    status_history:
--+        - working: true
--+          agent: "testing"
--+          comment: "POST /api/games/{game_id}/score works correctly for all quarters (Q1-Q4). Winning number calculation is accurate. Winner determination and payout calculation working. Only game creators can update scores (proper authorization). User balances updated correctly."
--+
--+  - task: "User Profile"
--+    implemented: true
--+    working: true
--+    file: "/app/backend/server.py"
--+    stuck_count: 0
--+    priority: "high"
--+    needs_retesting: false
--+    status_history:
--+        - working: true
--+          agent: "testing"
--+          comment: "GET /api/profile successfully returns user info, entries, payouts, created games, and total winnings. All data properly aggregated and returned."
--+
--+  - task: "Random Number Generation"
--+    implemented: true
--+    working: true
--+    file: "/app/backend/server.py"
--+    stuck_count: 0
--+    priority: "high"
--+    needs_retesting: false
--+    status_history:
--+        - working: true
--+          agent: "testing"
--+          comment: "Random number generation (0-9, no duplicates) works correctly when all squares are filled. Game status changes from 'pending' to 'active' as expected."
--+
--+  - task: "Balance Management"
--+    implemented: true
--+    working: true
--+    file: "/app/backend/server.py"
--+    stuck_count: 0
--+    priority: "high"
--+    needs_retesting: false
--+    status_history:
--+        - working: true
--+          agent: "testing"
--+          comment: "User balance deduction on game join and credit on win working correctly. Payout percentages (Q1: 20%, Q2: 20%, Q3: 20%, Q4: 40%) calculated accurately."
--+
--+frontend:
--+  - task: "Frontend Testing"
--+    implemented: false
--+    working: "NA"
--+    file: "N/A"
--+    stuck_count: 0
--+    priority: "low"
--+    needs_retesting: false
--+    status_history:
--+        - working: "NA"
--+          agent: "testing"
--+          comment: "Frontend testing not performed as per system limitations and instructions. Only backend API testing was conducted."
--+
--+metadata:
--+  created_by: "testing_agent"
--+  version: "1.0"
--+  test_sequence: 1
--+  run_ui: false
--+
--+test_plan:
--+  current_focus: []
--+  stuck_tasks: []
--+  test_all: false
--+  test_priority: "high_first"
--+
--+agent_communication:
--+    - agent: "testing"
--+      message: "Comprehensive backend API testing completed successfully. All 15 test cases passed (100% success rate). Fixed 2 critical ObjectId serialization issues during testing. Backend is fully functional and ready for production use."
--\ No newline at end of file
+@@ -1,318 +0,0 @@
+-diff --git a/model.patch b/model.patch
+-index fff5e50..e69de29 100644
+---- a/model.patch
+-+++ b/model.patch
+-@@ -1,313 +0,0 @@
+--diff --git a/backend/server.py b/backend/server.py
+--index 6e6a6f3..8734de5 100644
+----- a/backend/server.py
+--+++ b/backend/server.py
+--@@ -280,6 +280,8 @@ async def create_game(game_request: CreateGameRequest, authorization: Optional[s
+--     }
+--     
+--     await db.games.insert_one(game)
+--+    # Remove MongoDB's _id field before returning
+--+    game.pop('_id', None)
+--     return game
+-- 
+-- @api_router.post("/games/{game_id}/join")
+--@@ -329,6 +331,8 @@ async def join_game(game_id: str, join_request: JoinGameRequest, authorization:
+--         "created_at": datetime.now(timezone.utc)
+--     }
+--     await db.game_entries.insert_one(entry)
+--+    # Remove MongoDB's _id field before returning
+--+    entry.pop('_id', None)
+--     
+--     # Update game squares
+--     game["squares"][square_num] = {
+--diff --git a/quick_test.py b/quick_test.py
+--new file mode 100644
+--index 0000000..a72dcbf
+----- /dev/null
+--+++ b/quick_test.py
+--@@ -0,0 +1,126 @@
+--+#!/usr/bin/env python3
+--+"""
+--+Quick test for game joining functionality
+--+"""
+--+
+--+import requests
+--+import json
+--+import time
+--+import subprocess
+--+
+--+BASE_URL = "https://luckyvibe.preview.emergentagent.com/api"
+--+MONGO_DB = "test_database"
+--+
+--+def create_test_user():
+--+    """Create a test user and session in MongoDB"""
+--+    timestamp = int(time.time() * 1000)
+--+    user_id = f"user_{timestamp}"
+--+    session_token = f"test_session_{timestamp}"
+--+    email = f"test.user.{timestamp}@example.com"
+--+    
+--+    mongo_commands = f'''
+--+use('{MONGO_DB}');
+--+db.users.insertOne({{
+--+  user_id: "{user_id}",
+--+  email: "{email}",
+--+  name: "Test User",
+--+  picture: "https://via.placeholder.com/150",
+--+  mock_balance: 1000.0,
+--+  created_at: new Date()
+--+}});
+--+db.user_sessions.insertOne({{
+--+  user_id: "{user_id}",
+--+  session_token: "{session_token}",
+--+  expires_at: new Date(Date.now() + 7*24*60*60*1000),
+--+  created_at: new Date()
+--+}});
+--+'''
+--+    
+--+    try:
+--+        result = subprocess.run(
+--+            ["mongosh", "--eval", mongo_commands],
+--+            capture_output=True,
+--+            text=True,
+--+            timeout=30
+--+        )
+--+        
+--+        if result.returncode == 0:
+--+            print(f"✅ Created user: {user_id}")
+--+            return user_id, session_token
+--+        else:
+--+            print(f"❌ MongoDB error: {result.stderr}")
+--+            return None, None
+--+            
+--+    except Exception as e:
+--+        print(f"❌ Error creating test user: {e}")
+--+        return None, None
+--+
+--+def test_game_flow():
+--+    """Test the complete game flow"""
+--+    
+--+    # Create test user
+--+    user_id, session_token = create_test_user()
+--+    if not session_token:
+--+        print("❌ Failed to create test user")
+--+        return
+--+    
+--+    headers = {
+--+        "Authorization": f"Bearer {session_token}",
+--+        "Content-Type": "application/json"
+--+    }
+--+    
+--+    # Create game
+--+    print("🧪 Creating game...")
+--+    game_data = {"event_name": "Test Super Bowl", "entry_fee": 20.0}
+--+    
+--+    try:
+--+        response = requests.post(f"{BASE_URL}/games", headers=headers, json=game_data, timeout=10)
+--+        print(f"Create game response: {response.status_code}")
+--+        
+--+        if response.status_code == 200:
+--+            game = response.json()
+--+            game_id = game["game_id"]
+--+            print(f"✅ Created game: {game_id}")
+--+        else:
+--+            print(f"❌ Failed to create game: {response.text}")
+--+            return
+--+            
+--+    except Exception as e:
+--+        print(f"❌ Error creating game: {e}")
+--+        return
+--+    
+--+    # Join game
+--+    print("🧪 Joining game...")
+--+    join_data = {"square_number": 0}
+--+    
+--+    try:
+--+        response = requests.post(f"{BASE_URL}/games/{game_id}/join", headers=headers, json=join_data, timeout=10)
+--+        print(f"Join game response: {response.status_code}")
+--+        
+--+        if response.status_code == 200:
+--+            join_result = response.json()
+--+            print(f"✅ Joined game successfully: {join_result}")
+--+        else:
+--+            print(f"❌ Failed to join game: {response.text}")
+--+            
+--+    except Exception as e:
+--+        print(f"❌ Error joining game: {e}")
+--+    
+--+    # Cleanup
+--+    print("🧹 Cleaning up...")
+--+    mongo_commands = f'''
+--+use('{MONGO_DB}');
+--+db.users.deleteMany({{email: /test\\.user\\./}});
+--+db.user_sessions.deleteMany({{session_token: /test_session/}});
+--+db.games.deleteMany({{event_name: "Test Super Bowl"}});
+--+db.game_entries.deleteMany({{user_id: /user_/}});
+--+'''
+--+    
+--+    try:
+--+        subprocess.run(["mongosh", "--eval", mongo_commands], capture_output=True, text=True, timeout=30)
+--+        print("✅ Cleanup completed")
+--+    except Exception as e:
+--+        print(f"⚠️  Cleanup error: {e}")
+--+
+--+if __name__ == "__main__":
+--+    test_game_flow()
+--\ No newline at end of file
+--diff --git a/test_result.md b/test_result.md
+--index 187cba4..93bf431 100644
+----- a/test_result.md
+--+++ b/test_result.md
+--@@ -100,4 +100,150 @@
+-- 
+-- #====================================================================================================
+-- # Testing Data - Main Agent and testing sub agent both should log testing data below this section
+---#====================================================================================================
+--\ No newline at end of file
+--+#====================================================================================================
+--+
+--+user_problem_statement: "Sports Squares betting game backend API testing"
+--+
+--+backend:
+--+  - task: "User Authentication"
+--+    implemented: true
+--+    working: true
+--+    file: "/app/backend/server.py"
+--+    stuck_count: 0
+--+    priority: "high"
+--+    needs_retesting: false
+--+    status_history:
+--+        - working: true
+--+          agent: "testing"
+--+          comment: "GET /api/auth/me successfully returns user info with valid token. POST /api/auth/logout successfully logs out user. Authentication system working correctly."
+--+
+--+  - task: "Game Creation"
+--+    implemented: true
+--+    working: true
+--+    file: "/app/backend/server.py"
+--+    stuck_count: 1
+--+    priority: "high"
+--+    needs_retesting: false
+--+    status_history:
+--+        - working: false
+--+          agent: "testing"
+--+          comment: "Initial test failed with HTTP 520 due to ObjectId serialization error in FastAPI response"
+--+        - working: true
+--+          agent: "testing"
+--+          comment: "Fixed ObjectId serialization issue by removing MongoDB's _id field before returning game object. POST /api/games now successfully creates games with proper event_name and entry_fee."
+--+
+--+  - task: "Game Listing"
+--+    implemented: true
+--+    working: true
+--+    file: "/app/backend/server.py"
+--+    stuck_count: 0
+--+    priority: "high"
+--+    needs_retesting: false
+--+    status_history:
+--+        - working: true
+--+          agent: "testing"
+--+          comment: "GET /api/games successfully returns list of games including newly created games. User entries are properly included for each game."
+--+
+--+  - task: "Game Joining"
+--+    implemented: true
+--+    working: true
+--+    file: "/app/backend/server.py"
+--+    stuck_count: 1
+--+    priority: "high"
+--+    needs_retesting: false
+--+    status_history:
+--+        - working: false
+--+          agent: "testing"
+--+          comment: "Initial test failed with HTTP 520 due to ObjectId serialization error in game entry response"
+--+        - working: true
+--+          agent: "testing"
+--+          comment: "Fixed ObjectId serialization issue in join_game function. POST /api/games/{game_id}/join now works correctly. Verified 2-entry limit per user is enforced. Game activation works when all 10 squares are filled."
+--+
+--+  - task: "Game Details"
+--+    implemented: true
+--+    working: true
+--+    file: "/app/backend/server.py"
+--+    stuck_count: 0
+--+    priority: "high"
+--+    needs_retesting: false
+--+    status_history:
+--+        - working: true
+--+          agent: "testing"
+--+          comment: "GET /api/games/{game_id} successfully returns detailed game info including squares, entries, random numbers, and payouts. All fields properly populated when game is active."
+--+
+--+  - task: "Score Updates"
+--+    implemented: true
+--+    working: true
+--+    file: "/app/backend/server.py"
+--+    stuck_count: 0
+--+    priority: "high"
+--+    needs_retesting: false
+--+    status_history:
+--+        - working: true
+--+          agent: "testing"
+--+          comment: "POST /api/games/{game_id}/score works correctly for all quarters (Q1-Q4). Winning number calculation is accurate. Winner determination and payout calculation working. Only game creators can update scores (proper authorization). User balances updated correctly."
+--+
+--+  - task: "User Profile"
+--+    implemented: true
+--+    working: true
+--+    file: "/app/backend/server.py"
+--+    stuck_count: 0
+--+    priority: "high"
+--+    needs_retesting: false
+--+    status_history:
+--+        - working: true
+--+          agent: "testing"
+--+          comment: "GET /api/profile successfully returns user info, entries, payouts, created games, and total winnings. All data properly aggregated and returned."
+--+
+--+  - task: "Random Number Generation"
+--+    implemented: true
+--+    working: true
+--+    file: "/app/backend/server.py"
+--+    stuck_count: 0
+--+    priority: "high"
+--+    needs_retesting: false
+--+    status_history:
+--+        - working: true
+--+          agent: "testing"
+--+          comment: "Random number generation (0-9, no duplicates) works correctly when all squares are filled. Game status changes from 'pending' to 'active' as expected."
+--+
+--+  - task: "Balance Management"
+--+    implemented: true
+--+    working: true
+--+    file: "/app/backend/server.py"
+--+    stuck_count: 0
+--+    priority: "high"
+--+    needs_retesting: false
+--+    status_history:
+--+        - working: true
+--+          agent: "testing"
+--+          comment: "User balance deduction on game join and credit on win working correctly. Payout percentages (Q1: 20%, Q2: 20%, Q3: 20%, Q4: 40%) calculated accurately."
+--+
+--+frontend:
+--+  - task: "Frontend Testing"
+--+    implemented: false
+--+    working: "NA"
+--+    file: "N/A"
+--+    stuck_count: 0
+--+    priority: "low"
+--+    needs_retesting: false
+--+    status_history:
+--+        - working: "NA"
+--+          agent: "testing"
+--+          comment: "Frontend testing not performed as per system limitations and instructions. Only backend API testing was conducted."
+--+
+--+metadata:
+--+  created_by: "testing_agent"
+--+  version: "1.0"
+--+  test_sequence: 1
+--+  run_ui: false
+--+
+--+test_plan:
+--+  current_focus: []
+--+  stuck_tasks: []
+--+  test_all: false
+--+  test_priority: "high_first"
+--+
+--+agent_communication:
+--+    - agent: "testing"
+--+      message: "Comprehensive backend API testing completed successfully. All 15 test cases passed (100% success rate). Fixed 2 critical ObjectId serialization issues during testing. Backend is fully functional and ready for production use."
+--\ No newline at end of file
