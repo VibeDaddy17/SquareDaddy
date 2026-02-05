@@ -216,7 +216,10 @@ async def get_games(authorization: Optional[str] = Header(None)):
     if not user:
         raise HTTPException(status_code=401, detail="Not authenticated")
     
-    games = await db.games.find({}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    games = await db.games.find(
+        {},
+        {"_id": 0, "game_id": 1, "creator_id": 1, "event_name": 1, "entry_fee": 1, "status": 1, "squares": 1, "random_numbers": 1, "created_at": 1, "quarter_scores": 1, "winners": 1}
+    ).sort("created_at", -1).limit(100).to_list(100)
     
     # Add user's entries to each game
     for game in games:
