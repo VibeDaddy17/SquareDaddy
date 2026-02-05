@@ -245,8 +245,8 @@ async def get_game(game_id: str, authorization: Optional[str] = Header(None)):
     # Get all entries for this game
     entries = await db.game_entries.find(
         {"game_id": game_id},
-        {"_id": 0}
-    ).to_list(100)
+        {"_id": 0, "entry_id": 1, "user_id": 1, "user_name": 1, "square_number": 1, "paid_amount": 1, "created_at": 1}
+    ).limit(100).to_list(100)
     game["entries"] = entries
     
     # Get payouts if game is active or completed
