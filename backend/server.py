@@ -555,20 +555,20 @@ async def get_profile(authorization: Optional[str] = Header(None)):
     # Get user's game entries
     entries = await db.game_entries.find(
         {"user_id": user.user_id},
-        {"_id": 0}
-    ).to_list(100)
+        {"_id": 0, "entry_id": 1, "game_id": 1, "square_number": 1, "paid_amount": 1, "created_at": 1}
+    ).limit(100).to_list(100)
     
     # Get user's payouts
     payouts = await db.payouts.find(
         {"user_id": user.user_id},
         {"_id": 0}
-    ).to_list(100)
+    ).limit(100).to_list(100)
     
     # Get games created by user
     created_games = await db.games.find(
         {"creator_id": user.user_id},
-        {"_id": 0}
-    ).to_list(100)
+        {"_id": 0, "game_id": 1, "event_name": 1, "entry_fee": 1, "status": 1, "created_at": 1}
+    ).limit(100).to_list(100)
     
     return {
         "user": user,
