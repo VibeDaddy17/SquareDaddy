@@ -17,13 +17,23 @@ export default function CreateScreen() {
 
   const handleCreateGame = async () => {
     if (!eventName.trim()) {
-      Alert.alert('Error', 'Please enter an event name');
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Please enter an event name',
+        position: 'top',
+      });
       return;
     }
 
     const fee = entryFee === '' ? 0 : parseFloat(entryFee);
     if (isNaN(fee) || fee < 0) {
-      Alert.alert('Error', 'Please enter a valid entry fee (0 or greater)');
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Please enter a valid entry fee (0 or greater)',
+        position: 'top',
+      });
       return;
     }
 
@@ -44,23 +54,35 @@ export default function CreateScreen() {
 
       if (response.ok) {
         const game = await response.json();
-        Alert.alert('Success', 'Game created successfully!', [
-          {
-            text: 'OK',
-            onPress: () => {
-              setEventName('');
-              setEntryFee('');
-              router.push(`/game/${game.game_id}`);
-            }
-          }
-        ]);
+        Toast.show({
+          type: 'success',
+          text1: 'Success!',
+          text2: 'Game created successfully',
+          position: 'top',
+        });
+        setEventName('');
+        setEntryFee('');
+        // Navigate after a brief delay to show the toast
+        setTimeout(() => {
+          router.push(`/game/${game.game_id}`);
+        }, 1500);
       } else {
         const error = await response.json();
-        Alert.alert('Error', error.detail || 'Failed to create game');
+        Toast.show({
+          type: 'error',
+          text1: 'Error',
+          text2: error.detail || 'Failed to create game',
+          position: 'top',
+        });
       }
     } catch (error) {
       console.error('Error creating game:', error);
-      Alert.alert('Error', 'Failed to create game');
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to create game',
+        position: 'top',
+      });
     } finally {
       setLoading(false);
     }
