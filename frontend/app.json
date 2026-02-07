@@ -23,7 +23,17 @@
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/favicon.png",
+      "backgroundColor": "#1a1a2e",
+      "themeColor": "#4CAF50",
+      "description": "Join games, pick squares, win big! The ultimate sports betting squares app.",
+      "preferRelatedApplications": false,
+      "shortName": "SquareDaddy",
+      "display": "standalone",
+      "orientation": "portrait",
+      "startUrl": "/",
+      "lang": "en",
+      "scope": "/"
     },
     "plugins": [
       "expo-router",
