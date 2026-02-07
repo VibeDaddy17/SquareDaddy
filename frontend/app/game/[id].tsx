@@ -197,16 +197,15 @@ export default function GameDetailScreen() {
 
   const handleShareGame = async () => {
     try {
-      // Use actual web URL instead of custom scheme for PWA
+      // Use actual web URL for PWA
       const gameUrl = `https://luckyvibe.preview.emergentagent.com/game/${id}`;
       
-      // Prepare share message
+      // Prepare share message - don't include URL as separate parameter to avoid duplicates
       const message = `Join my SquareDaddy game: ${game.event_name}!\n\nEntry Fee: $${game.entry_fee}\nSquares Available: ${10 - game.squares.filter((s: any) => s !== null).length}/10\n\nTap to join: ${gameUrl}`;
 
       const result = await Share.share({
         message: message,
         title: `Join ${game.event_name}`,
-        url: gameUrl, // Include URL separately for better platform support
       });
 
       if (result.action === Share.sharedAction) {
