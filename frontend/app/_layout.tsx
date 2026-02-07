@@ -4,6 +4,7 @@ import { Stack, useRouter } from 'expo-router';
 import { AuthProvider } from '../contexts/AuthContext';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as Linking from 'expo-linking';
+import Toast from 'react-native-toast-message';
 
 export default function RootLayout() {
   const router = useRouter();
