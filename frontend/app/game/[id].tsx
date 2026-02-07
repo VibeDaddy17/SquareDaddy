@@ -197,15 +197,29 @@ export default function GameDetailScreen() {
 
   const handleShareGame = async () => {
     try {
-      const gameUrl = `squaredaddy://game/${id}`;
+      // Use actual web URL instead of custom scheme for PWA
+      const gameUrl = `https://luckyvibe.preview.emergentagent.com/game/${id}`;
+      
+      // Prepare share message
       const message = `Join my SquareDaddy game: ${game.event_name}!\n\nEntry Fee: $${game.entry_fee}\nSquares Available: ${10 - game.squares.filter((s: any) => s !== null).length}/10\n\nTap to join: ${gameUrl}`;
-      const result = await Share.share({ message: message, title: `Join ${game.event_name}` });
+
+      const result = await Share.share({
+        message: message,
+        title: `Join ${game.event_name}`,
+        url: gameUrl, // Include URL separately for better platform support
+      });
+
       if (result.action === Share.sharedAction) {
         console.log('Shared successfully');
       }
     } catch (error) {
       console.error('Error sharing:', error);
-      Toast.show({ type: 'error', text1: 'Error', text2: 'Failed to share game link', position: 'top' });
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to share game link',
+        position: 'top',
+      });
     }
   };
 
