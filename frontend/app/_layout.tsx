@@ -49,6 +49,7 @@ export default function RootLayout() {
           <Stack.Screen name="game/[id]" />
           <Stack.Screen name="game/admin/[id]" />
         </Stack>
+        <Toast />
       </AuthProvider>
     </GestureHandlerRootView>
   );
