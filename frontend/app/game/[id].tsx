@@ -23,22 +23,47 @@ export default function GameDetailScreen() {
 
   useEffect(() => {
     fetchGame();
-  }, [id]);
+  }, [id, user]);
 
   const fetchGame = async () => {
     try {
       const token = await AsyncStorage.getItem('session_token');
+      
+      // If no token and no user, redirect to login
+      if (!token && !user) {
+        router.replace('/');
+        return;
+      }
+      
       const response = await fetch(`${BACKEND_URL}/api/games/${id}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
+      
+      if (response.status === 401) {
+        // Unauthorized - redirect to login
+        Toast.show({
+          type: 'info',
+          text1: 'Please sign in',
+          text2: 'Sign in to view this game',
+          position: 'top',
+        });
+        setTimeout(() => {
+          router.replace('/');
+        }, 1500);
+        return;
+      }
+      
       if (response.ok) {
         const data = await response.json();
         setGame(data);
+      } else {
+        setGame(null);
       }
     } catch (error) {
       console.error('Error fetching game:', error);
+      setGame(null);
     } finally {
       setLoading(false);
     }
